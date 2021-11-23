@@ -2,10 +2,13 @@ const express = require("express");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 
 app.use(bodyParser());
+
+app.use(cors());
 
 if (!process.env.PORT) process.exit(1);
 
@@ -31,15 +34,17 @@ const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  if (token === null) return res.status(401).json({ respStatus: false, respMsg: "Not Authorized" });
-  
+  if (token === null)
+    return res
+      .status(401)
+      .json({ respStatus: false, respMsg: "Not Authorized" });
+
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.status(401).json({ respStatus: false, respMsg: err });
     req.user = user;
     next();
   });
 };
-
 
 app.get("/", (req, res) => {
   res.send("<h1> Hello World </h1>");
@@ -53,8 +58,8 @@ app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
     // const user = await User.findOne({ username });
-    const user = Users.filter((x) => x.username === username)[0];
-
+    const user = Users.filter((x) => x.username === username && x.password === password)[0];
+    
     if (!user)
       return res
         .status(401)
@@ -70,4 +75,3 @@ app.post("/login", async (req, res) => {
     res.status(503).json({ respStatus: false, respMsg: "Server Error!" });
   }
 });
-
