@@ -27,8 +27,26 @@ app.listen(PORT, () => {
   console.log(`Server 🔥🔥🔥 up on port: ${PORT}`);
 });
 
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (token === null) return res.status(401).json({ respStatus: false, respMsg: "Not Authorized" });
+  
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(401).json({ respStatus: false, respMsg: err });
+    req.user = user;
+    next();
+  });
+};
+
+
 app.get("/", (req, res) => {
   res.send("<h1> Hello World </h1>");
+});
+
+app.get("/dash", authenticateToken, (req, res) => {
+  res.send("<h1> Dashboard </h1>");
 });
 
 app.post("/login", async (req, res) => {
@@ -52,3 +70,4 @@ app.post("/login", async (req, res) => {
     res.status(503).json({ respStatus: false, respMsg: "Server Error!" });
   }
 });
+
