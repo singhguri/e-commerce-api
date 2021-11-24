@@ -1,6 +1,7 @@
-global.TextEncoder = require("util").TextEncoder;
-global.TextDecoder = require("util").TextDecoder;
-
+if (process.platform !== "win32") {
+  global.TextEncoder = require("util").TextEncoder;
+  global.TextDecoder = require("util").TextDecoder;
+}
 const express = require("express");
 require("dotenv").config();
 const bodyParser = require("body-parser");

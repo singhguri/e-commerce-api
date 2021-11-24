@@ -45,35 +45,55 @@ module.exports = (app, Product) => {
     try {
       const { username, password } = req.body;
       // const user = await User.findOne({ username });
-      const user = Users.filter(
-        (x) => x.username === username && x.password === password
-      );
-      console.log(user);
+      const user = Users.filter((x) => x.username === username)[0];
+
       if (!user)
         return res.status(401).json({
           respStatus: false,
           respMsg: "Please enter a valid username.",
         });
-      const accessToken = jwt.sign({ username, id: user._id }, JWT_SECRET, {
-        expiresIn: process.env.NODE_ENV === "production" ? "6h" : "2 days",
-      });
-      res
-        .status(200)
-        .json({ respStatus: true, respMsg: "User Logged in!", accessToken });
+
+      if (user.password === password) {
+        const accessToken = jwt.sign({ username, id: user._id }, JWT_SECRET, {
+          expiresIn: process.env.NODE_ENV === "production" ? "6h" : "2 days",
+        });
+
+        res
+          .status(200)
+          .json({ respStatus: true, respMsg: "User Logged in!", accessToken });
+      } else {
+        res
+          .status(200)
+          .json({ respStatus: false, respMsg: "Incorrect credentials" });
+      }
     } catch (err) {
       console.log(err);
       res.status(503).json({ respStatus: false, respMsg: "Server Error!" });
     }
   });
 
-  // GetAll
-  app.get("/getAllProducts", async (req, res) => {
-    const products = await Product.find({});
-    res.status(200).send(products);
+  // Get All Products
+  app.get("/product/all", async (req, res) => {
+    try {
+      const products = await Product.find({});
+      res.status(200).json({ respStatus: true, respMsg: products });
+    } catch (err) {
+      res.status(500).json({ respStatus: false, respMsg: err });
+    }
   });
 
-  // add product
-  app.post("/addProduct", async (req, res) => {
+  // Get Product By Id
+  app.get("/product/{_id}", async (req, res) => {
+    try {
+      const product = await Product.find({ _id: id });
+      res.status(200).json({ respStatus: true, respMsg: product });
+    } catch (err) {
+      res.status(500).json({ respStatus: false, respMsg: err });
+    }
+  });
+
+  // Add Product
+  app.post("/product/add", async (req, res) => {
     const product = new Product({});
 
     try {
