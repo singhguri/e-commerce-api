@@ -6,7 +6,7 @@ const express = require("express");
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const cors = require("cors");
-require("./db/db");
+// require("./db/db");
 const Product = require("./models/products");
 
 const app = express();
